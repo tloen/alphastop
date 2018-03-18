@@ -76,7 +76,7 @@ x_j = tf.placeholder(
 )
 
 data = tf.placeholder_with_default(
-  input = tf.stack((x_i, x_j)),
+  input=tf.stack((x_i, x_j)),
   shape=(None, max_length, 27)
 )
 
@@ -84,7 +84,10 @@ print(data.shape)
 
 hidden_dimension = 5
 
-batch_size = 2
+batch_size = tf.placeholder_with_default(
+  input=tf.constant(2),
+  shape=()
+)
 
 cell = tf.contrib.rnn.GRUCell(hidden_dimension, name="gru_cell")
 
@@ -106,7 +109,7 @@ score_j = outputs[1][-1][0]
 z = tf.multiply(-sigma, tf.subtract(score_i, score_j))
 p_ij = tf.divide(1.0, tf.add(1.0, tf.exp(z)))
 cost = tf.negative(tf.log(p_ij))
-opt = tf.train.GradientDescentOptimizer(0.01)
+opt = tf.train.GradientDescentOptimizer(0.001)
 train = opt.minimize(cost)
 
 with tf.Session() as sess:
@@ -114,16 +117,26 @@ with tf.Session() as sess:
   moving_average_accuracy = 0.5
   for t in range(100000):
     words, raws = generate_two_words()
-    if raws[0][::-1] < raws[1][::-1]:
+    if raws[0] < raws[1]:
       i, j = 1, 0
     else:
       i, j = 0, 1
     c, _ = sess.run([cost, train], feed_dict={x_i: words[i], x_j: words[j]})
 
-    moving_average_accuracy = 0.99 * moving_average_accuracy + 0.01 * (c < 0.69)
+    moving_average_accuracy = 0.999 * moving_average_accuracy + 0.001 * (c < 0.69)
     if t % 100 == 0:
       print(t, moving_average_accuracy)
-    
+  def word_score(word):
+    return sess.run(outputs, 
+    feed_dict={
+      data: np.reshape(encode_word(word), (-1, max_length, 27)),
+      batch_size: 1,
+      x_i: encode_word(word),
+      x_j: encode_word(word)
+      })[0, -1, 0]
+  words = ["oh", "say", "can", "you", "see"]
+  pairs = [(-word_score(w), w) for w in words]
+  print(sorted(pairs))
 
 
 
