@@ -1,28 +1,36 @@
 import tensorflow as tf
 import alphamodel as am
+import numpy as np
 
-cost = am.negative_log_probability
+cost = am.cost
 train = am.train
 init = tf.global_variables_initializer()
 data = am.data
+scores = am.scores
 
 with tf.Session() as sess:
-  def attempt_sort(n):
-    words, raws = am.generate_word_matrix(5)
+  def attempt_sort(n): 
+    words, raws = am.generate_word_matrix(n)
     scores = sess.run(am.scores, feed_dict = {data: words})
     sw = list(zip(scores.tolist(), raws))
     sw.sort()
-    ordered = [w for s, w in sw]
+    # ordered = [w for s, w in sw]
     return sw
+  def is_sorted(x):
+    return all(sorted(x) == x)
 
   sess.run(init)
-  moving_average_cost = 0.5
-  words, raws = am.generate_word_matrix(5)
+  words, raws = am.generate_word_matrix(2)
+  moving_average_cost = sess.run(cost, feed_dict={data: words})
+  moving_average_accuracy = 0.5
   for t in range(100000):
-    words, raws = am.generate_word_matrix(5)
-    c, _ = sess.run([cost, train], feed_dict={data: words})
-    moving_average_cost = 0.99 * moving_average_cost + 0.01 * c
+    words, raws = am.generate_word_matrix(2)
+    c, _, s = sess.run([cost, train, scores], feed_dict={data: words})
+    moving_average_cost = 0.999 * moving_average_cost + 0.001 * c
+
+    moving_average_accuracy = 0.999 * moving_average_accuracy + \
+      0.001 * is_sorted(s)
     if (t + 1) % 100 == 0:
-      print(t + 1, attempt_sort(5))
+      print(t + 1, np.exp(-moving_average_cost))
   
     
