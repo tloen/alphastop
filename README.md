@@ -1,4 +1,3 @@
 # alphastop
 
-This is mainly a test implementation of RankNet/LambdaRank.
-
+Test bed for differentiable permutation learning research.

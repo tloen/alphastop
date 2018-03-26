@@ -35,7 +35,7 @@ def generate_word():
 def generate_words(n):
   raws = []
   words = np.zeros((0, max_length, 27))
-  for i in range(n):
+  for _ in range(n):
     word, raw = generate_word()
     raws.append(raw)
     words = np.vstack([words, word.reshape(1, max_length, 27)])
