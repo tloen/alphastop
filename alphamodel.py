@@ -8,7 +8,7 @@ AVG_WORD_LENGTH = 8
 MAX_WORD_LENGTH = 19 
 MAX_LENGTH = MAX_WORD_LENGTH + 1
 HIDDEN_DIMENSION = 5
-K = 100
+K = 10
 
 def index(c):
   if c.islower():
