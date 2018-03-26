@@ -100,9 +100,11 @@ cost = tf.negative(log_likelihood)
 opt = tf.train.AdamOptimizer(0.0001)
 train = opt.minimize(cost)
 
-likelihood = np.exp(log_likelihood)
+likelihood = tf.exp(log_likelihood)
 
 # tensorboard
 with tf.name_scope('summaries'):
   tf.summary.scalar('likelihood', likelihood)
   tf.summary.scalar('cost', cost)
+
+merged = tf.summary.merge_all()

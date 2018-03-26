@@ -18,6 +18,8 @@ with tf.Session() as sess:
     return sw
   def is_sorted(x):
     return all(sorted(x) == x)
+  
+  train_writer = tf.summary.FileWriter('./summaries/train_log_2', sess.graph)
 
   sess.run(init)
   words, raws = am.generate_word_matrix(2)
@@ -25,12 +27,13 @@ with tf.Session() as sess:
   moving_average_accuracy = 0.5
   for t in range(100000):
     words, raws = am.generate_word_matrix(2)
-    c, _, s = sess.run([cost, train, scores], feed_dict={data: words})
+    m, c, _, s = sess.run([am.merged, cost, train, scores], feed_dict={data: words})
+    if t % 100 == 0:
+      train_writer.add_summary(m, t)
+
     moving_average_cost = 0.999 * moving_average_cost + 0.001 * c
 
     moving_average_accuracy = 0.999 * moving_average_accuracy + \
       0.001 * is_sorted(s)
     if (t + 1) % 100 == 0:
       print(t + 1, np.exp(-moving_average_cost))
-  
-    
